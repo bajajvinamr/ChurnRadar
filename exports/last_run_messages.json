@@ -1,0 +1,58 @@
+{
+  "Payment-sensitive churners": {
+    "channel": "email",
+    "variants": [
+      {
+        "title": "Demo",
+        "body": "```json\n{\n  \"channel\": \"push_notification\",\n  \"variants\": [\n    {\n      \"title\": \"We Value You!\",\n      \"body\": \"Enjoy exclusive offers and curated bundles just for you. Your satisfaction is our prior"
+      }
+    ],
+    "_eval": {
+      "overall": 5,
+      "urgency": "medium",
+      "compliance_ok": true
+    }
+  },
+  "High-tenure recent drop": {
+    "_eval": {
+      "overall": 7,
+      "urgency": "medium",
+      "compliance_ok": true
+    },
+    "channel": "email",
+    "variants": [
+      {
+        "title": "Demo",
+        "body": "Fallback message"
+      }
+    ]
+  },
+  "Premium engagement lapsed": {
+    "channel": "email",
+    "variants": [
+      {
+        "title": "Demo",
+        "body": "```json\n{\n  \"channel\": \"push_notification\",\n  \"variants\": [\n    {\n      \"title\": \"We Miss You!\",\n      \"body\": \"Your premium benefits are waiting! Enjoy exclusive support and curated bundles. Come bac"
+      }
+    ],
+    "_eval": {
+      "overall": 5,
+      "urgency": "medium",
+      "compliance_ok": true
+    }
+  },
+  "AtRisk High-Value": {
+    "_eval": {
+      "overall": 7,
+      "urgency": "medium",
+      "compliance_ok": true
+    },
+    "channel": "email",
+    "variants": [
+      {
+        "title": "Demo",
+        "body": "Fallback message"
+      }
+    ]
+  }
+}

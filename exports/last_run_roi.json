@@ -1,0 +1,30 @@
+{
+  "Payment-sensitive churners": {
+    "size": 1603,
+    "est_recovered": 6971.06,
+    "cost": 400.75,
+    "net": 6570.31,
+    "roi_ratio": 16.395034310667498
+  },
+  "High-tenure recent drop": {
+    "size": 821,
+    "est_recovered": 3933.62,
+    "cost": 205.25,
+    "net": 3728.37,
+    "roi_ratio": 18.165018270401948
+  },
+  "Premium engagement lapsed": {
+    "size": 1151,
+    "est_recovered": 5033.200000000001,
+    "cost": 287.75,
+    "net": 4745.450000000001,
+    "roi_ratio": 16.491572545612513
+  },
+  "AtRisk High-Value": {
+    "size": 733,
+    "est_recovered": 3887.5,
+    "cost": 183.25,
+    "net": 3704.25,
+    "roi_ratio": 20.21418826739427
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "cohorts": {
+    "Payment-sensitive churners": {
+      "size": 1603,
+      "avg_score": 0.33814044265627,
+      "avg_tenure": 12.192139737991265,
+      "avg_recency": 9.052401746724891,
+      "avg_engagement": 4.809731752963194,
+      "avg_value": 217.43792888334374,
+      "archetype": "ValueSensitive",
+      "archetype_reason": "Fallback classification"
+    },
+    "High-tenure recent drop": {
+      "size": 821,
+      "avg_score": 0.3733444342289385,
+      "avg_tenure": 18.907429963459197,
+      "avg_recency": 9.440925700365408,
+      "avg_engagement": 4.749695493300853,
+      "avg_value": 239.56272838002437,
+      "archetype": "ValueSensitive",
+      "archetype_reason": "Fallback classification"
+    },
+    "Premium engagement lapsed": {
+      "size": 1151,
+      "avg_score": 0.3504402977092628,
+      "avg_tenure": 11.687228496959166,
+      "avg_recency": 8.464813205907905,
+      "avg_engagement": 5.5477845351867945,
+      "avg_value": 218.6446568201564,
+      "archetype": "ValueSensitive",
+      "archetype_reason": "Fallback classification"
+    },
+    "AtRisk High-Value": {
+      "size": 733,
+      "avg_score": 0.3844077677204365,
+      "avg_tenure": 15.201909959072305,
+      "avg_recency": 9.593451568894952,
+      "avg_engagement": 4.8963165075034105,
+      "avg_value": 265.1773533424284,
+      "archetype": "ValueSensitive",
+      "archetype_reason": "Fallback classification"
+    }
+  }
+}
