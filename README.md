@@ -1,8 +1,7 @@
 # Churn Radar 🧭
-**CEO-Proof AI-Powered Customer Resurrection Platform**
+**AI-Powered Customer Resurrection Platform**
 
-[![QA Status](https://img.shields.io/badge/QA%20Status-✅%20CEO%20Proof-brightgreen)](./QA_SIGNOFF_REPORT.md)
-[![TRD Compliance](https://img.shields.io/badge/TRD-Fully%20Compliant-blue)](./TRD_COMPLIANCE_REPORT.md)
+
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://python.org)
 [![OpenAI](https://img.shields.io/badge/powered%20by-GPT--3.5-black)](https://openai.com)
 [![Performance](https://img.shields.io/badge/performance-%3C1s%20pipeline-green)](#performance)
@@ -16,7 +15,7 @@ Transform churned customers into recovered revenue. Churn Radar identifies **₹
 - 👥 **842** expected reactivations within 30 days
 - ⚡ **<1 second** end-to-end analysis
 
-## 🚀 Quick Demo (CEO-Ready)
+## 🚀 Quick Demo 
 
 ### 1. One-Click Setup
 ```bash
@@ -33,7 +32,7 @@ echo "USE_RAG=true" >> .env
 
 ### 2. Launch Dashboard
 ```bash
-# Start CEO-proof demo
+# Start  demo
 cd app && streamlit run app.py
 python run_churn_radar.py
 
@@ -148,9 +147,6 @@ ChurnRadar/
 │   ├── manifest.json           # Export metadata
 │   ├── last_run_roi.json       # ROI calculations
 │   └── *.csv                   # Cohort exports
-├── QA_RUNBOOK.md              # Comprehensive QA checklist  
-├── QA_SIGNOFF_REPORT.md       # Production readiness validation
-└── TRD_COMPLIANCE_REPORT.md   # Technical requirements compliance
 └── tests/                      # Unit test suite
 ```
 
@@ -266,9 +262,6 @@ cd app && streamlit run app.py --server.port 8501 --server.address 0.0.0.0
 
 ## 📋 QA & Compliance
 
-- ✅ **[QA Runbook](QA_RUNBOOK.md)**: 16-section CEO-proof validation checklist
-- ✅ **[QA Sign-off](QA_SIGNOFF_REPORT.md)**: Production readiness certification
-- ✅ **[TRD Compliance](TRD_COMPLIANCE_REPORT.md)**: Full technical requirements verification
 - ✅ **Performance**: <1s end-to-end pipeline, 15s max requirement exceeded
 - ✅ **Validation**: All 7 conversation functions tested and operational
 
