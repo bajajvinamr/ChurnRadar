@@ -234,16 +234,52 @@ def export_group_csv(group_name: str) -> str:
 def export_copy_pack(group_name: str) -> str:
     """
     Export copy pack JSON for a group and return file path.
+    Schema matches UX spec: cohort, archetype, audience_size, channels, assumptions
     """
     exports_dir = Path(__file__).parent.parent.parent / "exports"
     exports_dir.mkdir(exist_ok=True)
     
+    groups = get_groups()
+    defaults = get_defaults()
+    
+    if group_name not in groups:
+        return ""
+    
+    group_data = groups[group_name]
+    summary = group_data["summary"]
+    config = defaults.get(group_name, {})
     messages = kept_messages(group_name)
     
+    # Build channels structure with variants and UTM parameters
+    channels = {}
+    for channel_name, channel_data in messages.items():
+        variants = channel_data.get("variants", [])
+        if variants:
+            variant = variants[0]  # Keep the best variant
+            channels[channel_name] = {
+                "variant": {
+                    "title": variant.get("title", ""),
+                    "body": variant.get("body", ""),
+                    "_eval": variant.get("_eval", {})
+                },
+                "utm": {
+                    "source": "churn_radar",
+                    "medium": channel_name,
+                    "campaign": f"winback_{summary.get('archetype', 'general').lower()}_v1"
+                }
+            }
+    
     copy_pack = {
-        "group": group_name,
-        "timestamp": pd.Timestamp.now().isoformat(),
-        "messages": messages
+        "cohort": group_name,
+        "archetype": summary.get("archetype", "Premium"),
+        "audience_size": summary["size"],
+        "channels": channels,
+        "assumptions": {
+            "reactivation_rate": config.get("reactivation_rate", 0.12),
+            "aov": config.get("aov", 1800),
+            "margin": config.get("margin", 0.62)
+        },
+        "timestamp": pd.Timestamp.now().isoformat()
     }
     
     file_path = exports_dir / f"copy_pack_{group_name.replace(' ', '_')}.json"
@@ -255,17 +291,51 @@ def export_copy_pack(group_name: str) -> str:
 def export_manifest() -> str:
     """
     Export manifest.json with run metadata.
+    Schema: run_id, timestamp, dataset, model/version, groups, thresholds, assumptions
     """
     exports_dir = Path(__file__).parent.parent.parent / "exports"
     exports_dir.mkdir(exist_ok=True)
     
+    groups = get_groups()
+    defaults = get_defaults()
+    
+    # Calculate aggregate counts
+    total_customers = sum(g["summary"]["size"] for g in groups.values())
+    
     manifest = {
         "run_id": pd.Timestamp.now().strftime("%Y%m%d_%H%M%S"),
         "timestamp": pd.Timestamp.now().isoformat(),
-        "model": "gpt-4o-mini",
-        "brand_docs": ["brand_voice.md", "offer_policy.md", "compliance.md"],
-        "groups": list(get_groups().keys()),
-        "source": "streamlit_ui"
+        "dataset": {
+            "name": "E Commerce Dataset.csv",
+            "total_customers": total_customers,
+            "active_groups": len([g for g in groups.values() if g["summary"]["size"] > 0])
+        },
+        "model": {
+            "name": "gpt-4o-mini",
+            "version": "2024-07-18",
+            "provider": "openai"
+        },
+        "brand_docs": [
+            "brand_overview.md",
+            "brand_voice.md", 
+            "offer_policy.md", 
+            "compliance.md"
+        ],
+        "groups": list(groups.keys()),
+        "thresholds": {
+            "min_group_size": 100,
+            "min_comeback_odds": 0.05,
+            "eval_overall": 3.8,
+            "eval_safety": 4.0
+        },
+        "default_assumptions": {
+            "reactivation_rate": 0.12,
+            "aov": 1800,
+            "margin": 0.62,
+            "send_cost": 0.25
+        },
+        "source": "streamlit_ui",
+        "timezone": "Asia/Kolkata"
     }
     
     file_path = exports_dir / "manifest.json"

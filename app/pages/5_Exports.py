@@ -239,6 +239,70 @@ if exports_dir.exists():
 else:
     st.warning("Export directory not found.")
 
+# Export schemas documentation
+st.markdown("---")
+st.subheader("📖 Export Schemas")
+
+with st.expander("📊 Per-Group CSV Schema"):
+    st.markdown("""
+**Columns:**
+- `CustomerID` - Unique customer identifier
+- `ComeBackOdds` - 0–1 score (use % in UI)
+- `LastSeenDays` - Integer days since last order
+- `OrderCount` - Total number of orders
+- `Engagement` - Normalized engagement index (0–1)
+- `AvgSpend` (₹) - Average spending per order
+- `TenureMonths` - Months as customer
+
+**Format:** CSV with headers, Indian rupee grouping in UI display
+    """)
+
+with st.expander("📝 copy_pack.json Schema"):
+    st.markdown("""
+**Structure:**
+```json
+{
+  "cohort": "Premium engagement lapsed",
+  "archetype": "Premium",
+  "audience_size": 8412,
+  "channels": {
+    "email": {
+      "variant": {
+        "title": "Your curated picks are ready",
+        "body": "...",
+        "_eval": {"overall": 4.6, "safety": 5}
+      },
+      "utm": {
+        "source": "churn_radar",
+        "medium": "email",
+        "campaign": "winback_premium_v1"
+      }
+    }
+  },
+  "assumptions": {
+    "reactivation_rate": 0.12,
+    "aov": 1800,
+    "margin": 0.62
+  }
+}
+```
+    """)
+
+with st.expander("📦 manifest.json Schema"):
+    st.markdown("""
+**Structure:**
+- `run_id` - Unique run identifier (YYYYMMDD_HHMMSS)
+- `timestamp` - ISO 8601 timestamp
+- `dataset` - Name, counts, active groups
+- `model` - Name, version, provider
+- `brand_docs` - List of brand documents used
+- `groups` - List of all group names
+- `thresholds` - Quality and safety thresholds
+- `default_assumptions` - Default economic parameters
+- `source` - Generation source (streamlit_ui, cli, etc)
+- `timezone` - Asia/Kolkata (IST)
+    """)
+
 # Export configuration
 st.markdown("---")
 st.subheader("⚙️ Export Settings")
