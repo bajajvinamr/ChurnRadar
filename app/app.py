@@ -282,7 +282,7 @@ if ladder_rows:
             
             # Business Insights
             insights = groups[top_group].get("insights", {})
-            if insights:
+            if insights and insights.get("insights"):
                 st.markdown("**💡 Business Insights**")
                 
                 # Risk level indicator
@@ -302,7 +302,42 @@ if ladder_rows:
                 if recommendations:
                     st.success(f"🎯 **Next Action:** {recommendations[0]}")
             else:
-                st.info("💡 Insights loading...")
+                # Provide fallback insights based on archetype and group data
+                summary = groups[top_group]["summary"]
+                st.markdown("**💡 Business Insights**")
+                
+                # Generate basic insights from the data
+                avg_recency = summary.get("avg_recency", 10)
+                avg_score = summary.get("avg_score", 0.3)
+                avg_value = summary.get("avg_value", 250)
+                
+                risk_level = "High" if avg_recency > 15 else "Medium" if avg_recency > 10 else "Low"
+                risk_colors = {"Low": "🟢", "Medium": "🟡", "High": "🔴"}
+                risk_color = risk_colors.get(risk_level, "🟡")
+                
+                st.markdown(f"{risk_color} **Risk Level:** {risk_level}")
+                st.markdown(f"⭐ **Priority Score:** {min(5.0, avg_score * 10 + 1):.1f}/5.0")
+                
+                # Generate insights based on data
+                if avg_recency <= 7:
+                    st.info("💡 Recent activity suggests high engagement potential")
+                elif avg_recency <= 14:
+                    st.info("💡 Moderate recency - good timing for re-engagement")
+                else:
+                    st.info("💡 Extended absence - requires compelling offer")
+                
+                if avg_value > 300:
+                    st.info("💡 High-value customers - worth premium approach")
+                
+                # Archetype-based recommendation
+                archetype_rec = {
+                    "Premium": "Lead with curation and personalized service",
+                    "ValueSensitive": "Emphasize value and smart bundling",
+                    "Loyalist": "Acknowledge loyalty and provide exclusive access",
+                    "AtRisk": "Reduce friction and provide immediate value"
+                }.get(archetype, "Focus on clear value proposition")
+                
+                st.success(f"🎯 **Next Action:** {archetype_rec}")
 
         # Messages Preview
         st.markdown("---")
