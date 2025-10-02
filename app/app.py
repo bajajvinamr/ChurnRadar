@@ -24,6 +24,10 @@ try:
     from churn_core.logic import get_groups, get_defaults, kept_messages, calculate_roi
     from churn_core.data import format_inr, format_percent, format_days, format_months, format_score_as_odds
     from churn_core.brand import ARCHETYPES
+    from churn_core.content import (
+        get_metric_label, get_metric_tooltip, get_column_label, get_section_header,
+        get_tour_banner, get_archetype_info, get_badge_text
+    )
 except ImportError as e:
     st.error(f"Import error: {e}")
     st.stop()
@@ -93,6 +97,12 @@ try:
 except:
     st.info("Demo Mode: On | Dataset: E Commerce Dataset.csv | Records: 5,630 | Last Export: Unknown")
 
+# First-time tour banner
+tour_banner = get_tour_banner()
+if tour_banner:
+    with st.expander("💡 What you're seeing", expanded=False):
+        st.markdown(tour_banner)
+
 # Cache data loading
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_data():
@@ -131,27 +141,30 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.metric(
-        label="Recoverable Profit (30d)",
-        value=format_inr(total_profit)
+        label=get_metric_label("recoverable_profit"),
+        value=format_inr(total_profit),
+        help=get_metric_tooltip("recoverable_profit")
     )
 
 with col2:
     st.metric(
-        label="Ready Groups Today", 
-        value=ready_groups
+        label=get_metric_label("ready_groups"), 
+        value=ready_groups,
+        help=get_metric_tooltip("ready_groups")
     )
 
 with col3:
     st.metric(
-        label="Expected Reactivations",
-        value=f"{total_reactivations:,}"
+        label=get_metric_label("expected_reactivations"),
+        value=f"{total_reactivations:,}",
+        help=get_metric_tooltip("expected_reactivations")
     )
 
 st.caption("Based on today's groups and baseline response rates.")
 
 # Cohort Ladder
 st.markdown("---")
-st.subheader("Top 3 Groups")
+st.subheader(get_section_header("top_opportunities"))
 
 # Build ladder data
 ladder_rows = []

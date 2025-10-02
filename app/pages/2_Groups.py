@@ -6,6 +6,9 @@ import pandas as pd
 from churn_core.logic import get_groups, get_defaults
 from churn_core.data import format_inr, format_percent, format_days, format_months, format_score_as_odds
 from churn_core.brand import ARCHETYPES
+from churn_core.content import (
+    get_column_label, get_column_tooltip, get_archetype_info, get_empty_state
+)
 
 st.set_page_config(page_title="Groups - Churn Radar", page_icon="👥", layout="wide")
 
