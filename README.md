@@ -256,7 +256,7 @@ export DATASET_PATH="dataset.csv"
 export USE_RAG="true"
 export TZ="Asia/Kolkata"
 
-# Launch CEO-ready application
+# Launch application
 cd app && streamlit run app.py --server.port 8501 --server.address 0.0.0.0
 ```
 
