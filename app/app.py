@@ -25,6 +25,7 @@ try:
     from churn_core.data import format_inr, format_percent, format_days, format_months, format_score_as_odds
     from churn_core.brand import ARCHETYPES
     from churn_core.content import METRIC_DEFINITIONS, ARCHETYPE_REASONS, COHORT_LIBRARY, COPY_RULES
+    from chat_interface import render_chat_interface, render_conversation_starter
 except ImportError as e:
     st.error(f"Import error: {e}")
     st.stop()
@@ -121,53 +122,189 @@ def load_data():
 # Load data
 groups, defaults = load_data()
 
-# Top Strip - Key Metrics
+# Render chat interface in sidebar
+render_chat_interface()
+
+# Conversation starter in main content
+render_conversation_starter()
+
+# Headline KPIs (TRD Section 2.1)
 st.markdown("---")
 
-# Calculate aggregate metrics
-ready_groups = sum(1 for card in groups.values() if card["summary"]["size"] > 0)
-total_reactivations = 0
-total_profit = 0
-
-for name, card in groups.items():
-    summary = card["summary"]
-    config = defaults.get(name, {})
+# Get headline KPIs using conversation layer
+try:
+    from churn_core.conversation import get_headline_kpis
+    kpis = get_headline_kpis()
     
-    if summary["size"] > 0 and config:
-        reactivations = int(summary["size"] * config.get("reactivation_rate", 0))
-        profit = reactivations * config.get("aov", 0) * config.get("margin", 0)
+    # Top Tiles: Recoverable Profit (30d) · Ready Groups Today · Expected Reactivations
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "💰 Recoverable Profit (30d)",
+            format_inr(kpis["recoverable_profit_30d"]),
+            help="Total profit recoverable from re-engaging at-risk customers within 30 days"
+        )
+    
+    with col2:
+        st.metric(
+            "📊 Ready Groups Today", 
+            kpis["ready_groups_today"],
+            help="Customer groups that meet criteria for immediate re-engagement campaigns"
+        )
+    
+    with col3:
+        st.metric(
+            "👥 Expected Reactivations",
+            f"{kpis['expected_reactivations']:,}",
+            help="Estimated customers who will return based on historical reactivation rates"
+        )
+    
+    # Show assumptions in expandable section
+    with st.expander("📋 Assumptions", expanded=False):
+        assumptions = kpis["assumptions"]
+        col_a, col_b, col_c = st.columns(3)
+        with col_a:
+            st.metric("Reactivation Rate", f"{assumptions['rr']:.0%}")
+        with col_b:
+            st.metric("Average Order Value", format_inr(assumptions['aov']))
+        with col_c:
+            st.metric("Profit Margin", f"{assumptions['margin']:.0%}")
+
+except Exception as e:
+    # Fallback to original metrics if conversation layer fails
+    st.warning("Using fallback metrics. Conversation layer unavailable.")
+    
+    ready_groups = sum(1 for card in groups.values() if card["summary"]["size"] > 0)
+    total_reactivations = 0
+    total_profit = 0
+
+    for name, card in groups.items():
+        summary = card["summary"]
+        config = defaults.get(name, {})
         
-        total_reactivations += reactivations
-        total_profit += profit
-
-# Display metrics in columns
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric(
-        label="Recoverable Profit (30d)",
-        value=format_inr(total_profit)
-    )
-
-with col2:
-    st.metric(
-        label="Ready Groups Today", 
-        value=ready_groups
-    )
-
-with col3:
-    st.metric(
-        label="Expected Reactivations",
-        value=f"{total_reactivations:,}"
-    )
+        if summary["size"] > 0 and config:
+            reactivations = int(summary["size"] * config.get("reactivation_rate", 0))
+            profit = reactivations * config.get("aov", 0) * config.get("margin", 0)
+            
+            total_reactivations += reactivations
+            total_profit += profit
+    
+    # Display fallback metrics
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "💰 Recoverable Profit (30d)",
+            format_inr(total_profit)
+        )
+    
+    with col2:
+        st.metric(
+            "📊 Ready Groups Today", 
+            ready_groups
+        )
+    
+    with col3:
+        st.metric(
+            "👥 Expected Reactivations",
+            f"{total_reactivations:,}"
+        )
 
 st.caption("Based on today's groups and baseline response rates.")
+
+# ROI Waterfall (TRD Section 2.2)
+st.markdown("---")
+st.subheader("📊 ROI Waterfall")
+st.markdown("*Revenue · Reactivations · Groups breakdown*")
+
+try:
+    # Get ROI data from conversation layer
+    from churn_core.conversation import show_roi
+    roi_data = show_roi()
+    
+    # Display waterfall metrics
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "💰 Total Revenue Potential",
+            format_inr(roi_data["total_revenue"]),
+            help="Total revenue if all reactivation campaigns succeed"
+        )
+    
+    with col2:
+        st.metric(
+            "👥 Total Reactivations",
+            f"{roi_data['total_reactivations']:,}",
+            help="Expected customers to reactivate across all groups"
+        )
+    
+    with col3:
+        st.metric(
+            "📊 Active Groups",
+            roi_data["active_groups"],
+            help="Number of customer groups ready for campaigns"
+        )
+    
+    # Show top contributors
+    if roi_data.get("top_contributors"):
+        st.markdown("**Top Contributors:**")
+        for i, contributor in enumerate(roi_data["top_contributors"][:3], 1):
+            st.markdown(f"{i}. **{contributor['group']}** - {format_inr(contributor['revenue'])} ({contributor['people']:,} people)")
+
+except Exception as e:
+    # Fallback to calculated metrics
+    st.warning("Using calculated ROI metrics. Conversation layer unavailable.")
+    
+    total_revenue = 0
+    total_reactivations = 0
+    active_groups = 0
+    contributors = []
+    
+    for name, card in groups.items():
+        summary = card["summary"]
+        config = defaults.get(name, {})
+        
+        if summary["size"] > 0 and config:
+            active_groups += 1
+            reactivations = int(summary["size"] * config.get("reactivation_rate", 0))
+            revenue = reactivations * config.get("aov", 0)
+            
+            total_reactivations += reactivations
+            total_revenue += revenue
+            
+            contributors.append({
+                "group": name,
+                "revenue": revenue,
+                "people": reactivations
+            })
+    
+    # Display fallback metrics
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("💰 Total Revenue Potential", format_inr(total_revenue))
+    
+    with col2:
+        st.metric("👥 Total Reactivations", f"{total_reactivations:,}")
+    
+    with col3:
+        st.metric("📊 Active Groups", active_groups)
+    
+    # Show top contributors
+    if contributors:
+        contributors.sort(key=lambda x: x["revenue"], reverse=True)
+        st.markdown("**Top Contributors:**")
+        for i, contributor in enumerate(contributors[:3], 1):
+            st.markdown(f"{i}. **{contributor['group']}** - {format_inr(contributor['revenue'])} ({contributor['people']:,} people)")
 
 # Cohort Ladder with help
 st.markdown("---")
 col_header, col_help = st.columns([3, 1])
 with col_header:
-    st.subheader("Where to start")
+    st.subheader("🎯 Where to Start (Top-3)")
+    st.markdown("*Groups ranked by profit potential with one-line reasons*")
 with col_help:
     with st.expander("ⓘ What are these groups?"):
         for cohort_name, info in COHORT_LIBRARY.items():
@@ -302,11 +439,14 @@ if ladder_rows:
                 if recommendations:
                     st.success(f"🎯 **Next Action:** {recommendations[0]}")
             else:
-                # Provide fallback insights based on archetype and group data
+                # Provide AI-enhanced insights with fallback
+                from churn_core.logic import generate_ai_insights
                 summary = groups[top_group]["summary"]
+                group_data = groups[top_group]["data"]
+                
                 st.markdown("**💡 Business Insights**")
                 
-                # Generate basic insights from the data
+                # Generate basic metrics
                 avg_recency = summary.get("avg_recency", 10)
                 avg_score = summary.get("avg_score", 0.3)
                 avg_value = summary.get("avg_value", 250)
@@ -318,7 +458,12 @@ if ladder_rows:
                 st.markdown(f"{risk_color} **Risk Level:** {risk_level}")
                 st.markdown(f"⭐ **Priority Score:** {min(5.0, avg_score * 10 + 1):.1f}/5.0")
                 
-                # Generate insights based on data
+                # Generate AI insights (with fallback)
+                with st.spinner("Generating AI insights..."):
+                    ai_insight = generate_ai_insights(top_group, group_data)
+                    st.info(f"🤖 {ai_insight}")
+                
+                # Additional data-driven insights
                 if avg_recency <= 7:
                     st.info("💡 Recent activity suggests high engagement potential")
                 elif avg_recency <= 14:

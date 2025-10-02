@@ -13,6 +13,60 @@ from pathlib import Path
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, parent_dir)
 
+def generate_ai_insights(cohort_name: str, data: pd.DataFrame) -> str:
+    """Generate AI insights for a cohort using OpenAI API"""
+    import os
+    import httpx
+    from dotenv import load_dotenv
+    
+    load_dotenv()
+    api_key = os.getenv('OPENAI_API_KEY')
+    
+    if not api_key:
+        return f"AI insights unavailable (no API key). {cohort_name} has {len(data)} customers with varied engagement patterns."
+    
+    # Create data summary for AI
+    summary_stats = {
+        'count': len(data),
+        'avg_revenue': data.get('Total_Revenue', data.get('total_revenue', pd.Series([0]))).mean(),
+        'avg_tenure': data.get('Tenure_Months', data.get('tenure_months', pd.Series([0]))).mean(),
+        'common_categories': data.get('Product_Category', data.get('product_category', pd.Series(['Unknown']))).value_counts().head(3).to_dict() if 'Product_Category' in data.columns or 'product_category' in data.columns else {},
+    }
+    
+    prompt = f"""Analyze this customer cohort briefly:
+
+Cohort: {cohort_name}
+Size: {summary_stats['count']} customers
+Avg Revenue: ₹{summary_stats['avg_revenue']:.0f}
+Avg Tenure: {summary_stats['avg_tenure']:.1f} months
+
+Provide a 2-3 sentence insight about what makes this group unique and actionable retention strategy. Focus on business value and practical next steps."""
+
+    try:
+        headers = {'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
+        payload = {
+            'model': 'gpt-3.5-turbo',
+            'messages': [{'role': 'user', 'content': prompt}],
+            'max_tokens': 150,
+            'temperature': 0.7
+        }
+        
+        response = httpx.post(
+            'https://api.openai.com/v1/chat/completions',
+            json=payload,
+            headers=headers,
+            timeout=15
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result['choices'][0]['message']['content'].strip()
+        else:
+            return f"This cohort ({len(data)} customers) shows unique retention patterns worth investigating. Consider targeted engagement strategies."
+            
+    except Exception as e:
+        return f"Analysis pending. {cohort_name} represents {len(data)} customers with specific churn risk indicators requiring strategic attention."
+
 def get_groups() -> Dict[str, Dict[str, Any]]:
     """
     Returns cohort_cards structure with group summaries and data.

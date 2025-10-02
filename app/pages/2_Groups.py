@@ -159,6 +159,23 @@ if all_rows:
             else:
                 st.warning("Archetype guidance not available for this group.")
         
+        # AI Insights Section
+        st.markdown("---")
+        st.markdown("### 🤖 AI Analysis")
+        
+        insight_col1, insight_col2 = st.columns([2, 1])
+        
+        with insight_col1:
+            if st.button("🔍 Generate Fresh Insights", use_container_width=True):
+                from churn_core.logic import generate_ai_insights
+                
+                with st.spinner("Analyzing group patterns..."):
+                    ai_insight = generate_ai_insights(selected_group, groups[selected_group]["data"])
+                    st.success(f"💡 **AI Insight:** {ai_insight}")
+        
+        with insight_col2:
+            st.caption("Click to get AI-powered strategic analysis of this group's behavior patterns and retention opportunities.")
+        
         # Action buttons
         st.markdown("---")
         button_col1, button_col2, button_col3 = st.columns([1, 1, 2])

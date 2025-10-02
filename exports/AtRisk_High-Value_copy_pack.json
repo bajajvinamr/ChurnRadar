@@ -1,0 +1,72 @@
+{
+  "cohort": "AtRisk_High-Value",
+  "archetype": "General",
+  "audience_size": 1603,
+  "channels": {
+    "email": {
+      "variant": {
+        "id": "em_A",
+        "title": "Your curated picks are ready",
+        "body": "We've saved top-rated items for you. Priority support on every order.",
+        "_eval": {
+          "clarity": 5,
+          "on_brand": 5,
+          "persuasiveness": 4,
+          "relevance": 4,
+          "safety": 5,
+          "overall": 4.6
+        }
+      },
+      "utm": {
+        "source": "churn_radar",
+        "medium": "email",
+        "campaign": "winback_general_v1"
+      }
+    },
+    "whatsapp": {
+      "variant": {
+        "id": "wh_A",
+        "title": "Quick update",
+        "body": "Your favorites are back in stock \ud83d\udce6",
+        "_eval": {
+          "clarity": 5,
+          "on_brand": 4,
+          "persuasiveness": 4,
+          "relevance": 5,
+          "safety": 5,
+          "overall": 4.6
+        }
+      },
+      "utm": {
+        "source": "churn_radar",
+        "medium": "whatsapp",
+        "campaign": "winback_general_v1"
+      }
+    },
+    "push": {
+      "variant": {
+        "id": "pu_A",
+        "title": "Ready for you",
+        "body": "Quick tap to unlock your rewards",
+        "_eval": {
+          "clarity": 4,
+          "on_brand": 4,
+          "persuasiveness": 4,
+          "relevance": 4,
+          "safety": 5,
+          "overall": 4.2
+        }
+      },
+      "utm": {
+        "source": "churn_radar",
+        "medium": "push",
+        "campaign": "winback_general_v1"
+      }
+    }
+  },
+  "assumptions": {
+    "rr": 0.12,
+    "aov": 1800,
+    "margin": 0.62
+  }
+}

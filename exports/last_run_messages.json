@@ -4,7 +4,7 @@
     "variants": [
       {
         "title": "Demo",
-        "body": "```json\n{\n  \"channel\": \"push_notification\",\n  \"variants\": [\n    {\n      \"title\": \"We Value You!\",\n      \"body\": \"Enjoy exclusive offers and curated bundles just for you. Your satisfaction is our prior"
+        "body": "```json\n{\n  \"channel\": \"push_notification\",\n  \"variants\": [\n    {\n      \"title\": \"We Value You!\",\n      \"body\": \"Hi there! Enjoy exclusive seasonal discounts and cashback offers. Your convenience matt"
       }
     ],
     "_eval": {
@@ -32,7 +32,7 @@
     "variants": [
       {
         "title": "Demo",
-        "body": "```json\n{\n  \"channel\": \"push_notification\",\n  \"variants\": [\n    {\n      \"title\": \"We Miss You!\",\n      \"body\": \"Your premium benefits are waiting! Enjoy exclusive support and curated bundles. Come bac"
+        "body": "```json\n{\n  \"channel\": \"push\",\n  \"variants\": [\n    {\n      \"title\": \"We Miss You!\",\n      \"body\": \"Your premium benefits are waiting! Enjoy exclusive perks and curated bundles. Come back and elevate y"
       }
     ],
     "_eval": {
@@ -42,17 +42,17 @@
     }
   },
   "AtRisk High-Value": {
-    "_eval": {
-      "overall": 7,
-      "urgency": "medium",
-      "compliance_ok": true
-    },
     "channel": "email",
     "variants": [
       {
         "title": "Demo",
-        "body": "Fallback message"
+        "body": "```json\n{\n  \"channel\": \"push_notification\",\n  \"variants\": [\n    {\n      \"title\": \"We Value You!\",\n      \"body\": \"Hi there! We noticed you haven't engaged with us lately. Enjoy exclusive seasonal disco"
       }
-    ]
+    ],
+    "_eval": {
+      "overall": 5,
+      "urgency": "medium",
+      "compliance_ok": true
+    }
   }
 }

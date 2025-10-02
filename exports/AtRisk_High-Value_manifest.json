@@ -1,0 +1,18 @@
+{
+  "run_id": "manual_export",
+  "timestamp": "2025-10-02 14:01:11 IST",
+  "cohort": "AtRisk_High-Value",
+  "files": {
+    "copy_pack": "AtRisk_High-Value_copy_pack.json",
+    "csv": "AtRisk_High-Value_customers.csv"
+  },
+  "eval_thresholds": {
+    "overall_min": 3.8,
+    "safety_min": 4.0
+  },
+  "roi_assumptions": {
+    "rr": 0.12,
+    "aov": 1800,
+    "margin": 0.62
+  }
+}
