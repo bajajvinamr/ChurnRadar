@@ -19,10 +19,10 @@ if 'selected_group' not in st.session_state or not st.session_state.selected_gro
     col1, col2 = st.columns(2)
     with col1:
         if st.button("← Back to Overview"):
-            st.switch_page("app/app.py")
+            st.switch_page("app.py")
     with col2:
         if st.button("Browse Groups →"):
-            st.switch_page("app/pages/2_Groups.py")
+            st.switch_page("pages/2_Groups.py")
     st.stop()
 
 selected_group = st.session_state.selected_group

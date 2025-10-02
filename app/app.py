@@ -233,7 +233,7 @@ if ladder_rows:
             with cols[i]:
                 if st.button(f"Start → {row['Group'][:20]}...", key=f"start_{i}"):
                     st.session_state.selected_group = row['Group']
-                    st.switch_page("app/pages/3_Messages.py")
+                    st.switch_page("pages/3_Messages.py")
 
     # Group Passport for Top Group
     if not ladder_df.empty:
