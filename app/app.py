@@ -24,6 +24,7 @@ try:
     from churn_core.logic import get_groups, get_defaults, kept_messages, calculate_roi
     from churn_core.data import format_inr, format_percent, format_days, format_months, format_score_as_odds
     from churn_core.brand import ARCHETYPES
+    from churn_core.content import METRIC_DEFINITIONS, ARCHETYPE_REASONS, COHORT_LIBRARY, COPY_RULES
 except ImportError as e:
     st.error(f"Import error: {e}")
     st.stop()
@@ -85,6 +86,19 @@ if 'selected_group' not in st.session_state:
 # Main app header
 st.title("🧭 Churn Radar")
 st.markdown("**Actionable User Resurrection at Scale**")
+
+# First-time user banner
+if 'hide_intro_banner' not in st.session_state:
+    st.session_state.hide_intro_banner = False
+
+if not st.session_state.hide_intro_banner:
+    with st.container():
+        st.info("""
+        **What you're seeing:** We rank today's best customer groups to re-activate, show the most effective messages to send, and estimate the profit if you act now. Click a group to see facts, copy, and money impact.
+        """)
+        if st.button("Got it, hide this"):
+            st.session_state.hide_intro_banner = True
+            st.rerun()
 
 # Demo mode banner
 try:
@@ -149,11 +163,22 @@ with col3:
 
 st.caption("Based on today's groups and baseline response rates.")
 
-# Cohort Ladder
+# Cohort Ladder with help
 st.markdown("---")
-st.subheader("Top 3 Groups")
+col_header, col_help = st.columns([3, 1])
+with col_header:
+    st.subheader("Where to start")
+with col_help:
+    with st.expander("ⓘ What are these groups?"):
+        for cohort_name, info in COHORT_LIBRARY.items():
+            st.markdown(f"**{cohort_name}**")
+            st.markdown(f"*Who:* {info['who']}")
+            if 'why_matters' in info:
+                st.markdown(f"*Why it matters:* {info['why_matters']}")
+            st.markdown(f"*Say:* {info['say']}")
+            st.markdown("---")
 
-# Build ladder data
+# Build ladder data with reasons
 ladder_rows = []
 for name, card in groups.items():
     summary = card["summary"]
@@ -163,22 +188,41 @@ for name, card in groups.items():
         reactivations = int(summary["size"] * config.get("reactivation_rate", 0))
         net_profit = reactivations * config.get("aov", 0) * config.get("margin", 0)
         
+        # Get archetype-based reason
+        archetype = summary.get("archetype", "Premium")
+        reason = ARCHETYPE_REASONS.get(archetype, "Focus on value and clear messaging.")
+        
         ladder_rows.append({
             "Group": name,
             "People": f"{summary['size']:,}",
             "Last Seen": format_days(summary["avg_recency"]),
             "Come-Back Odds": format_score_as_odds(summary["avg_score"]),
             "Net Profit (₹)": format_inr(net_profit),
-            "net_profit_numeric": net_profit  # For sorting
+            "net_profit_numeric": net_profit,  # For sorting
+            "reason": reason
         })
 
 if ladder_rows:
     # Sort by net profit descending and take top 3
     ladder_df = pd.DataFrame(ladder_rows).sort_values("net_profit_numeric", ascending=False).head(3)
     
-    # Display table without the numeric sorting column
-    display_df = ladder_df.drop(columns=["net_profit_numeric"])
-    st.dataframe(display_df, width="stretch", hide_index=True)
+    # Display each group with its reason
+    for _, row in ladder_df.iterrows():
+        col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1.5])
+        
+        with col1:
+            st.markdown(f"**{row['Group']}**")
+            st.caption(row['reason'])
+        with col2:
+            st.metric("People", row['People'])
+        with col3:
+            st.metric("Last Seen", row['Last Seen'], help=METRIC_DEFINITIONS["last_seen"]["definition"])
+        with col4:
+            st.metric("Come-Back Odds", row['Come-Back Odds'], help=METRIC_DEFINITIONS["come_back_odds"]["definition"])
+        with col5:
+            st.metric("Net Profit", row['Net Profit (₹)'], help=METRIC_DEFINITIONS["net_profit"]["definition"])
+        
+        st.markdown("---")
     
     # Action buttons for top groups
     st.markdown("**Quick Actions:**")
@@ -189,7 +233,7 @@ if ladder_rows:
             with cols[i]:
                 if st.button(f"Start → {row['Group'][:20]}...", key=f"start_{i}"):
                     st.session_state.selected_group = row['Group']
-                    st.switch_page("pages/3_Messages.py")
+                    st.switch_page("app/pages/3_Messages.py")
 
     # Group Passport for Top Group
     if not ladder_df.empty:
@@ -205,26 +249,26 @@ if ladder_rows:
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            passport_data = {
-                "Metric": [
-                    "People",
-                    "Come-Back Odds", 
-                    "Last Seen",
-                    "Activity",
-                    "Avg Spend",
-                    "Months with Brand"
-                ],
-                "Value": [
-                    f"{summary['size']:,} people",
-                    format_score_as_odds(summary['avg_score']),
-                    format_days(summary['avg_recency']),
-                    f"{summary.get('avg_engagement', 0):.1f}",
-                    format_inr(summary.get('avg_value', 0)),
-                    format_months(summary.get('avg_tenure', 0))
-                ]
-            }
-            passport_df = pd.DataFrame(passport_data)
-            st.dataframe(passport_df, hide_index=True, width="stretch")
+            st.markdown("**Group Passport**")
+            
+            # Display metrics with tooltips
+            metrics = [
+                ("People", f"{summary['size']:,} people", None),
+                ("Come-Back Odds", format_score_as_odds(summary['avg_score']), METRIC_DEFINITIONS["come_back_odds"]),
+                ("Last Seen", format_days(summary['avg_recency']), METRIC_DEFINITIONS["last_seen"]),
+                ("Activity", f"{summary.get('avg_engagement', 0):.1f}", METRIC_DEFINITIONS["activity"]),
+                ("Avg Spend", format_inr(summary.get('avg_value', 0)), METRIC_DEFINITIONS["avg_spend"]),
+                ("Months with Brand", format_months(summary.get('avg_tenure', 0)), METRIC_DEFINITIONS["months_with_brand"])
+            ]
+            
+            for metric_name, value, definition in metrics:
+                help_text = None
+                if definition:
+                    help_text = f"{definition['definition']}"
+                    if 'note' in definition:
+                        help_text += f" {definition['note']}"
+                
+                st.metric(metric_name, value, help=help_text)
         
         with col2:
             # Archetype guidance
@@ -262,7 +306,25 @@ if ladder_rows:
 
         # Messages Preview
         st.markdown("---")
-        st.subheader("Ready-to-Send Messages")
+        col_msg_header, col_msg_help = st.columns([3, 1])
+        with col_msg_header:
+            st.subheader("Ready-to-Send Messages")
+        with col_msg_help:
+            with st.expander("ⓘ How we write"):
+                st.markdown(f"**Tone:** {COPY_RULES['tone']}")
+                st.markdown("**Email:**")
+                st.markdown(f"- Subject: {COPY_RULES['email']['subject']}")
+                st.markdown(f"- Body: {COPY_RULES['email']['body']}")
+                st.markdown(f"- {COPY_RULES['email']['cta']}")
+                st.markdown("**WhatsApp:**")
+                st.markdown(f"- Length: {COPY_RULES['whatsapp']['length']}")
+                st.markdown(f"- Policy: {COPY_RULES['whatsapp']['policy']}")
+                st.markdown("**Push:**")
+                st.markdown(f"- Length: {COPY_RULES['push']['length']}")
+                st.markdown(f"- Structure: {COPY_RULES['push']['structure']}")
+                st.markdown(f"**Banned phrases:** {', '.join(COPY_RULES['banned_phrases'])}")
+                st.markdown(f"**Safe tokens:** {', '.join(COPY_RULES['safe_tokens'])}")
+                st.markdown(f"**Eval badge:** {COPY_RULES['eval_badge']}")
         
         msgs = kept_messages(top_group)
         msg_cols = st.columns(3)
@@ -288,26 +350,42 @@ if ladder_rows:
                 </div>
                 """, unsafe_allow_html=True)
 
-        # ROI Preview
+        # ROI Waterfall
         st.markdown("---")
-        st.subheader("Money impact")
+        st.subheader("ROI Waterfall")
         
         roi_data = calculate_roi(top_group)
         if roi_data:
+            inputs = roi_data["inputs"]
             outputs = roi_data["outputs"]
             
-            roi_col1, roi_col2, roi_col3 = st.columns(3)
+            # Create waterfall visualization with text
+            revenue = outputs['revenue']
+            gross_profit = outputs['gross_profit']
+            total_costs = outputs['total_costs']
+            net_profit = outputs['net_profit']
             
-            with roi_col1:
-                st.metric("Reactivated", f"{outputs['reactivated']:,}")
+            # Display waterfall steps
+            waterfall_col1, waterfall_col2, waterfall_col3, waterfall_col4, waterfall_col5 = st.columns(5)
             
-            with roi_col2:
-                st.metric("Net Profit", format_inr(outputs['net_profit']))
+            with waterfall_col1:
+                st.metric("Revenue", format_inr(revenue), help="Total revenue from reactivated customers")
             
-            with roi_col3:
-                st.metric("ROMI", f"{outputs['romi']:.1f}x")
+            with waterfall_col2:
+                st.metric("× Margin", f"{inputs['margin']*100:.0f}%", help="Gross profit margin after cost of goods")
+                st.caption(f"= {format_inr(gross_profit)}")
             
-            st.caption(f"Assumes {roi_data['inputs']['reactivation_rate']*100:.0f}% reactivation at ₹{roi_data['inputs']['aov']:,.0f} AOV")
+            with waterfall_col3:
+                st.metric("− Send Costs", format_inr(outputs['send_costs']), help="Cost to send messages to all customers")
+            
+            with waterfall_col4:
+                st.metric("− Incentives", format_inr(outputs['incentive_costs']), help="Cost of discounts/credits given")
+            
+            with waterfall_col5:
+                st.metric("Net Profit", format_inr(net_profit), help="Final profit after all costs", delta_color="normal")
+            
+            # Assumptions caption
+            st.caption(f"Assumes **{inputs['reactivation_rate']*100:.0f}% reactivation**, **{format_inr(inputs['aov'])} AOV**, **{inputs['margin']*100:.0f}% margin**.")
 
 else:
     st.warning("No groups available. Please check your data source.")

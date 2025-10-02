@@ -5,6 +5,7 @@ import streamlit as st
 import json
 from churn_core.logic import get_groups, kept_messages
 from churn_core.brand import ARCHETYPES
+from churn_core.content import REGENERATE_OPTIONS, COPY_RULES
 
 st.set_page_config(page_title="Messages - Churn Radar", page_icon="📝", layout="wide")
 
@@ -18,10 +19,10 @@ if 'selected_group' not in st.session_state or not st.session_state.selected_gro
     col1, col2 = st.columns(2)
     with col1:
         if st.button("← Back to Overview"):
-            st.switch_page("app.py")
+            st.switch_page("app/app.py")
     with col2:
         if st.button("Browse Groups →"):
-            st.switch_page("pages/2_Groups.py")
+            st.switch_page("app/pages/2_Groups.py")
     st.stop()
 
 selected_group = st.session_state.selected_group
@@ -48,6 +49,64 @@ st.info(f"**{selected_group}** • {summary['size']:,} people • {archetype} ar
 
 # Channel tabs
 tab1, tab2, tab3 = st.tabs(["📧 Email", "💬 WhatsApp", "📱 Push"])
+
+def show_regenerate_panel(channel, group_name):
+    """Show regenerate options and generate new message candidates."""
+    st.markdown("---")
+    st.subheader(f"🔄 Regenerate {channel.title()} Message")
+    
+    with st.form(f"regenerate_{channel}"):
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            tone = st.selectbox("Tone", REGENERATE_OPTIONS["tone"], key=f"tone_{channel}")
+        
+        with col2:
+            offer = st.selectbox("Offer", REGENERATE_OPTIONS["offer"], key=f"offer_{channel}")
+        
+        with col3:
+            length = st.selectbox("Length", REGENERATE_OPTIONS["length"], key=f"length_{channel}")
+        
+        with col4:
+            angle = st.selectbox("Angle", REGENERATE_OPTIONS["angle"], key=f"angle_{channel}")
+        
+        # Avoid phrases
+        avoid_phrases = st.multiselect(
+            "Avoid phrases (optional)", 
+            ["sale", "urgent", "limited time", "act now", "don't miss"],
+            key=f"avoid_{channel}"
+        )
+        
+        submitted = st.form_submit_button("Generate Candidates")
+        
+        if submitted:
+            with st.spinner(f"Generating {channel} message candidates..."):
+                # Simulate message generation
+                import time
+                time.sleep(2)  # Simulate API call
+                
+                # Show mock candidates
+                st.success("✅ Generated 3 candidates")
+                
+                for i in range(3):
+                    with st.expander(f"Candidate {i+1} - Eval 4.{i+2}★"):
+                        if channel == "email":
+                            st.markdown(f"**Subject:** Your {tone.lower()} picks await")
+                            st.markdown(f"**Body:** We've curated something special based on your preferences. {angle} with exclusive access.")
+                        elif channel == "whatsapp":
+                            st.markdown(f"**Message:** Hi! Your {angle.lower()} is ready. Quick view? 📦")
+                        else:  # push
+                            st.markdown(f"**Title:** {angle} Ready")
+                            st.markdown(f"**Body:** Tap to see your picks")
+                        
+                        col_keep, col_details = st.columns([1, 2])
+                        with col_keep:
+                            if st.button(f"Keep This", key=f"keep_{channel}_{i}"):
+                                st.success("✅ Message saved!")
+                        with col_details:
+                            st.caption(f"Eval: Clarity 4.{i+3}, On-brand 4.{i+2}, Relevance 4.{i+1}")
+                
+                st.info("💡 Regenerate steers style and offer policy. We always keep one clean, safe message.")
 
 def render_message_card(channel, variant, channel_icon):
     """Render a message card with evaluation badge."""
@@ -95,7 +154,7 @@ def render_message_card(channel, variant, channel_icon):
     
     with col2:
         if st.button(f"🔄 Regenerate {channel.title()}", key=f"regen_{channel}"):
-            st.info(f"🔄 Regenerating {channel} message... (Feature coming soon)")
+            show_regenerate_panel(channel, selected_group)
     
     # Evaluation details (expandable)
     if eval_data:
