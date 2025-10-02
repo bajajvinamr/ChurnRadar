@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import pandas as pd
 from churn_core.logic import get_groups, get_defaults, calculate_roi
 from churn_core.data import format_inr
+from churn_core.content import get_glossary_term, get_section_header, get_empty_state
 
 st.set_page_config(page_title="ROI Calculator - Churn Radar", page_icon="💰", layout="wide")
 
@@ -14,7 +15,7 @@ st.markdown("**What's the money?**")
 
 # Check if we have a selected group
 if 'selected_group' not in st.session_state or not st.session_state.selected_group:
-    st.warning("No group selected. Please choose a group from the Overview or Groups page.")
+    st.warning(get_empty_state("no_group_selected"))
     
     col1, col2 = st.columns(2)
     with col1:
@@ -62,7 +63,7 @@ with param_col1:
         max_value=25.0,
         value=default_params.get("reactivation_rate", 0.08) * 100,
         step=0.5,
-        help="Percentage of contacted customers who reactivate"
+        help=get_glossary_term("reactivation_rate")["definition"]
     ) / 100
     
     aov = st.slider(
@@ -71,7 +72,7 @@ with param_col1:
         max_value=10000,
         value=int(default_params.get("aov", 1500)),
         step=100,
-        help="Expected AOV for reactivated customers"
+        help=get_glossary_term("aov")["definition"]
     )
     
     margin = st.slider(
@@ -80,7 +81,7 @@ with param_col1:
         max_value=80.0, 
         value=default_params.get("margin", 0.60) * 100,
         step=1.0,
-        help="Gross profit margin on sales"
+        help=get_glossary_term("margin")["definition"]
     ) / 100
 
 with param_col2:

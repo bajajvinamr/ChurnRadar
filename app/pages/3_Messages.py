@@ -5,6 +5,10 @@ import streamlit as st
 import json
 from churn_core.logic import get_groups, kept_messages
 from churn_core.brand import ARCHETYPES
+from churn_core.content import (
+    get_copy_rules, get_badge_text, get_archetype_info,
+    get_section_header, get_empty_state
+)
 
 st.set_page_config(page_title="Messages - Churn Radar", page_icon="📝", layout="wide")
 
@@ -13,7 +17,7 @@ st.markdown("**What goes out?**")
 
 # Check if we have a selected group
 if 'selected_group' not in st.session_state or not st.session_state.selected_group:
-    st.warning("No group selected. Please choose a group from the Overview or Groups page.")
+    st.warning(get_empty_state("no_group_selected"))
     
     col1, col2 = st.columns(2)
     with col1:
@@ -135,10 +139,11 @@ with tab3:
 
 # Archetype guidance
 st.markdown("---")
-st.subheader("📋 Messaging Guidelines")
+st.subheader(get_section_header("messaging_guidelines"))
 
 if archetype in ARCHETYPES:
     arch_info = ARCHETYPES[archetype]
+    archetype_content = get_archetype_info(archetype)
     
     col1, col2 = st.columns(2)
     
@@ -152,6 +157,43 @@ if archetype in ARCHETYPES:
     with col2:
         st.markdown("**❌ What to avoid:**")
         st.warning(arch_info['what_to_avoid'])
+
+# Copy rules help panel
+with st.expander("📖 Message Copy Rules & Guidelines"):
+    copy_rules = get_copy_rules()
+    
+    st.markdown(f"### {copy_rules.get('title', 'How We Write')}")
+    st.markdown(f"**Tone:** {copy_rules.get('tone', 'Helpful and clear')}")
+    
+    st.markdown("---")
+    st.markdown("### Channel Guidelines")
+    
+    rule_col1, rule_col2, rule_col3 = st.columns(3)
+    
+    with rule_col1:
+        st.markdown("**📧 Email**")
+        email_rules = copy_rules.get('email', {})
+        st.markdown(f"- Subject: ≤{email_rules.get('subject_max', 50)} chars")
+        st.markdown(f"- Key info in first {email_rules.get('subject_key_info', 33)} chars")
+        st.markdown(f"- Body: ≤{email_rules.get('body_max_words', 110)} words")
+        st.markdown(f"- CTAs: {email_rules.get('cta_count', 1)}")
+    
+    with rule_col2:
+        st.markdown("**💬 WhatsApp**")
+        wa_rules = copy_rules.get('whatsapp', {})
+        st.markdown(f"- Length: {wa_rules.get('words', '25-30 words')}")
+        st.markdown(f"- Requirements: {wa_rules.get('requirements', 'Approved template')}")
+    
+    with rule_col3:
+        st.markdown("**📱 Push**")
+        push_rules = copy_rules.get('push', {})
+        st.markdown(f"- Length: {push_rules.get('words', '12-14 words')}")
+        st.markdown(f"- Structure: {push_rules.get('structure', '1 hook + 1 benefit')}")
+    
+    st.markdown("---")
+    st.markdown("### Safety Rules")
+    for rule in copy_rules.get('safety_rules', []):
+        st.markdown(f"- {rule}")
 
 # Batch operations
 st.markdown("---")

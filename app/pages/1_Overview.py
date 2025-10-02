@@ -6,11 +6,20 @@ import pandas as pd
 from churn_core.logic import get_groups, get_defaults, kept_messages, calculate_roi
 from churn_core.data import format_inr, format_percent, format_days, format_months, format_score_as_odds
 from churn_core.brand import ARCHETYPES
+from churn_core.content import (
+    get_metric_label, get_metric_tooltip, get_column_label, get_column_tooltip,
+    get_archetype_info, get_tour_banner, get_section_header
+)
 
 st.set_page_config(page_title="Overview - Churn Radar", page_icon="🏠", layout="wide")
 
 st.title("🏠 Overview")
 st.markdown("**Should we act today?**")
+
+# First-time tour banner
+tour_banner = get_tour_banner()
+if tour_banner:
+    st.info(f"💡 **{tour_banner}**")
 
 # Load data
 @st.cache_data(ttl=300)
@@ -47,29 +56,32 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.metric(
-        label="Recoverable Profit (30d)",
-        value=format_inr(total_profit)
+        label=get_metric_label("recoverable_profit"),
+        value=format_inr(total_profit),
+        help=get_metric_tooltip("recoverable_profit")
     )
 
 with col2:
     st.metric(
-        label="Ready Groups Today", 
-        value=ready_groups
+        label=get_metric_label("ready_groups"), 
+        value=ready_groups,
+        help=get_metric_tooltip("ready_groups")
     )
 
 with col3:
     st.metric(
-        label="Expected Reactivations",
-        value=f"{total_reactivations:,}"
+        label=get_metric_label("expected_reactivations"),
+        value=f"{total_reactivations:,}",
+        help=get_metric_tooltip("expected_reactivations")
     )
 
 st.caption("Based on today's groups and baseline response rates.")
 
 # Cohort Ladder - Top 3 by Net Profit
 st.markdown("---")
-st.subheader("Top Opportunities")
+st.subheader(get_section_header("top_opportunities"))
 
-# Build ladder data
+# Build ladder data with archetype info
 ladder_rows = []
 for name, card in groups.items():
     summary = card["summary"]
@@ -79,13 +91,19 @@ for name, card in groups.items():
         reactivations = int(summary["size"] * config.get("reactivation_rate", 0))
         net_profit = reactivations * config.get("aov", 0) * config.get("margin", 0)
         
+        # Get archetype from summary
+        archetype = summary.get("archetype", "Premium")
+        archetype_info = get_archetype_info(archetype)
+        
         ladder_rows.append({
             "Group": name,
             "People": f"{summary['size']:,}",
             "Last Seen": format_days(summary["avg_recency"]),
             "Come-Back Odds": format_score_as_odds(summary["avg_score"]),
             "Net Profit (₹)": format_inr(net_profit),
-            "net_profit_numeric": net_profit  # For sorting
+            "net_profit_numeric": net_profit,  # For sorting
+            "archetype": archetype,
+            "one_liner": archetype_info.get("one_liner", "")
         })
 
 if ladder_rows:
@@ -93,9 +111,43 @@ if ladder_rows:
     ladder_df = pd.DataFrame(ladder_rows).sort_values("net_profit_numeric", ascending=False)
     top_3_df = ladder_df.head(3)
     
-    # Display table without the numeric sorting column
-    display_df = top_3_df.drop(columns=["net_profit_numeric"])
-    st.dataframe(display_df, use_container_width=True, hide_index=True)
+    # Display column headers
+    header_cols = st.columns([2, 1, 1, 1, 1.5])
+    with header_cols[0]:
+        st.markdown("**Group**")
+    with header_cols[1]:
+        st.markdown(f"**{get_column_label('people')}**")
+    with header_cols[2]:
+        st.markdown(f"**{get_column_label('last_seen')}**")
+    with header_cols[3]:
+        st.markdown(f"**{get_column_label('comeback_odds')}**")
+    with header_cols[4]:
+        st.markdown(f"**{get_column_label('net_profit')} (₹)**")
+    
+    st.markdown("---")
+    
+    # Display each row with one-liner beneath
+    for idx, (_, row) in enumerate(top_3_df.iterrows()):
+        with st.container():
+            # Display row data
+            row_cols = st.columns([2, 1, 1, 1, 1.5])
+            with row_cols[0]:
+                st.markdown(f"**{row['Group']}**")
+            with row_cols[1]:
+                st.markdown(f"{row['People']}")
+            with row_cols[2]:
+                st.markdown(f"{row['Last Seen']}")
+            with row_cols[3]:
+                st.markdown(f"{row['Come-Back Odds']}")
+            with row_cols[4]:
+                st.markdown(f"**{row['Net Profit (₹)']}**")
+            
+            # Display one-liner
+            if row['one_liner']:
+                st.caption(f"💡 {row['one_liner']}")
+            
+            if idx < len(top_3_df) - 1:
+                st.markdown("")  # Add spacing between rows
     
     # Action buttons for top groups
     st.markdown("**Quick Actions:**")

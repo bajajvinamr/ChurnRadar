@@ -1,0 +1,195 @@
+{
+  "metrics": {
+    "recoverable_profit": {
+      "label": "Recoverable Profit (30d)",
+      "tooltip": "Projected net profit from recommended groups this month. Calculated as: Revenue × Margin − Sending Costs − Incentives.",
+      "unit": "₹"
+    },
+    "ready_groups": {
+      "label": "Ready Groups Today",
+      "tooltip": "Number of customer groups worth acting on now. Groups meet minimum thresholds for size and comeback probability.",
+      "unit": "count"
+    },
+    "expected_reactivations": {
+      "label": "Expected Reactivations",
+      "tooltip": "How many people we expect to come back if we send the recommended messages. Based on historical reactivation rates per group.",
+      "unit": "count"
+    }
+  },
+  "columns": {
+    "comeback_odds": {
+      "label": "Come-Back Odds",
+      "short_label": "Odds",
+      "tooltip": "What it is: A 0–100 score estimating how likely this group is to return if we reach out now.\n\nHow we compute: Combines past orders, recent activity, time away, spend signals, and satisfaction into one number.\n\nWhy it matters: Higher odds → higher chance of immediate revenue from win-back.",
+      "unit": "%"
+    },
+    "last_seen": {
+      "label": "Last Seen",
+      "short_label": "Last Seen",
+      "tooltip": "Average days since the group's last order. Shorter is 'warm', longer is 'cold'.",
+      "unit": "days"
+    },
+    "activity": {
+      "label": "Activity",
+      "short_label": "Activity",
+      "tooltip": "How much time this group spends with us (app/web) and devices used. It's a proxy for engagement.",
+      "unit": "index"
+    },
+    "avg_spend": {
+      "label": "Avg Spend",
+      "short_label": "Spend",
+      "tooltip": "Average money per purchase for this group (or a proxy built from cashback/coupons/spend uplift).",
+      "unit": "₹"
+    },
+    "months_with_brand": {
+      "label": "Months with Brand",
+      "short_label": "Tenure",
+      "tooltip": "Average tenure. Longer = stronger relationship; deserves respectful tone and fewer discounts.",
+      "unit": "months"
+    },
+    "net_profit": {
+      "label": "Net Profit",
+      "short_label": "Profit",
+      "tooltip": "Projected profit after margin, sending costs, and any incentives, over 30 days.",
+      "unit": "₹"
+    },
+    "people": {
+      "label": "People",
+      "tooltip": "Number of customers in this group.",
+      "unit": "count"
+    }
+  },
+  "archetypes": {
+    "Premium": {
+      "label": "Premium",
+      "one_liner": "High activity and recently lapsed—lead with curation, not discounts.",
+      "guidance": "Lead with curation and quality. Avoid generic discounts or mass-market messaging."
+    },
+    "ValueSensitive": {
+      "label": "Value-Sensitive", 
+      "one_liner": "Responds to value—try bundles/cashback, keep it light.",
+      "guidance": "Lead with value proposition and clear savings. Keep incentives light."
+    },
+    "Loyalist": {
+      "label": "Loyalist",
+      "one_liner": "Long relationship—remind and appreciate, no discount needed.",
+      "guidance": "Acknowledge their history and offer exclusive benefits. Don't treat them like new customers."
+    },
+    "AtRisk": {
+      "label": "At-Risk",
+      "one_liner": "Close to churning—one-tap reorder, reduce friction.",
+      "guidance": "Address concerns directly and offer immediate value. Quick restart, low friction."
+    },
+    "ServiceSensitive": {
+      "label": "Service-Sensitive",
+      "one_liner": "Reassure: faster delivery, better tracking, small apology credit.",
+      "guidance": "Highlight support quality and problem resolution. 'We fixed it' message works well."
+    }
+  },
+  "glossary": {
+    "reactivation_rate": {
+      "term": "Reactivation Rate",
+      "definition": "% of this group we expect to return after outreach."
+    },
+    "aov": {
+      "term": "AOV (Average Order Value)",
+      "definition": "Average revenue per order."
+    },
+    "margin": {
+      "term": "Margin",
+      "definition": "% of sales kept after cost of goods."
+    },
+    "incentive": {
+      "term": "Incentive",
+      "definition": "Discount/credit offered to nudge a purchase; we keep it light."
+    },
+    "eval": {
+      "term": "Eval (LLM-as-Judge)",
+      "definition": "Automated quality/safety review (0–5 stars) before we show copy."
+    }
+  },
+  "copy_rules": {
+    "title": "How We Write",
+    "tone": "Helpful, clear, benefit-first. No hype, no dark patterns.",
+    "email": {
+      "subject_max": 50,
+      "subject_key_info": 33,
+      "body_max_words": 110,
+      "cta_count": 1
+    },
+    "whatsapp": {
+      "words": "25–30 words",
+      "requirements": "Approved template, opt-in only"
+    },
+    "push": {
+      "words": "12–14 words",
+      "structure": "1 hook + 1 benefit + 1 verb"
+    },
+    "safety_rules": [
+      "Never use: 'guaranteed', 'last chance', 'only today', 'free for everyone'",
+      "No dark patterns or high-pressure tactics",
+      "One clear CTA per message"
+    ],
+    "safe_tokens": [
+      "{{last_category}}",
+      "{{top_device}}",
+      "{{bundle_hint}}",
+      "{{tenure_months}}"
+    ]
+  },
+  "badges": {
+    "brand_safe": "Brand-safe ✓",
+    "eval_format": "Eval {score}★"
+  },
+  "empty_states": {
+    "no_data": "We couldn't find your dataset. Upload a CSV/XLSX with the sample headers.",
+    "no_groups": "No groups meet the bar today. Try adjusting reactivation assumptions or check again tomorrow.",
+    "no_group_selected": "No group selected. Please choose a group from the Overview or Groups page.",
+    "message_failed_eval": "We couldn't pass safety/quality. Try Service Fix tone or Short length.",
+    "whatsapp_blocked": "WhatsApp requires approved templates and opt-in. Upload a template or switch to Email/Push."
+  },
+  "tour": {
+    "banner": "What you're seeing: We rank today's best customer groups to re-activate, show the most effective messages to send, and estimate the profit if you act now. Click a group to see facts, copy, and money impact.",
+    "steps": [
+      {
+        "target": "headline_tiles",
+        "message": "This is the money on the table for this month."
+      },
+      {
+        "target": "where_to_start",
+        "message": "Top groups, sorted by net profit. Click any row."
+      },
+      {
+        "target": "group_passport",
+        "message": "Key facts and an 'archetype' that guides tone and offer."
+      },
+      {
+        "target": "messages",
+        "message": "We show the best passing variant per channel. You can regenerate."
+      },
+      {
+        "target": "waterfall",
+        "message": "Assumptions and the final net profit from this group."
+      }
+    ]
+  },
+  "section_headers": {
+    "top_opportunities": "Where to Start",
+    "group_passport": "Group Passport",
+    "ready_messages": "Ready-to-Send Messages",
+    "roi_waterfall": "ROI Waterfall",
+    "messaging_guidelines": "Messaging Guidelines"
+  },
+  "ctas": {
+    "email": [
+      "Explore your picks →",
+      "Resume your favourites →"
+    ],
+    "whatsapp": [
+      "View your saved picks →"
+    ],
+    "push": [
+      "Pick up where you left off →"
+    ]
+  }
+}
