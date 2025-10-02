@@ -32,57 +32,7 @@ def get_groups() -> Dict[str, Dict[str, Any]]:
         
         return rcr.cohort_cards
     except Exception as e:
-        # Fallback with demo data if import fails
-        return {
-            "Payment-sensitive churners": {
-                "summary": {
-                    "size": 1603,
-                    "avg_score": 0.338,
-                    "avg_recency": 9.05,
-                    "avg_engagement": 4.81,
-                    "avg_value": 217.44,
-                    "avg_tenure": 12.19,
-                    "archetype": "ValueSensitive"
-                },
-                "data": pd.DataFrame()
-            },
-            "High-tenure recent drop": {
-                "summary": {
-                    "size": 821,
-                    "avg_score": 0.373,
-                    "avg_recency": 9.44,
-                    "avg_engagement": 4.75,
-                    "avg_value": 239.56,
-                    "avg_tenure": 18.91,
-                    "archetype": "Loyalist"
-                },
-                "data": pd.DataFrame()
-            },
-            "Premium engagement lapsed": {
-                "summary": {
-                    "size": 1151,
-                    "avg_score": 0.350,
-                    "avg_recency": 8.46,
-                    "avg_engagement": 5.55,
-                    "avg_value": 218.64,
-                    "avg_tenure": 11.69,
-                    "archetype": "Premium"
-                },
-                "data": pd.DataFrame()
-            },
-            "AtRisk High-Value": {
-                "summary": {
-                    "size": 733,
-                    "avg_score": 0.384,
-                    "avg_recency": 9.59,
-                    "avg_engagement": 4.90,
-                    "avg_value": 265.18,
-                    "avg_tenure": 15.20,
-                    "archetype": "AtRisk"
-                },
-                "data": pd.DataFrame()
-            }
-        }
+        raise Exception(f"Failed to load groups: {e}. Ensure run_churn_radar.py has been executed successfully and all dependencies are installed.")
 
 def get_defaults() -> Dict[str, Dict[str, float]]:
     """
@@ -188,39 +138,7 @@ def kept_messages(group_name: str) -> Dict[str, Any]:
                         # Multi-channel format
                         return group_data
     except Exception as e:
-        print(f"Error loading messages: {e}")
-        pass
-    
-    # Fallback demo messages
-    return {
-        "email": {
-            "variants": [
-                {
-                    "title": "Your curated picks are ready",
-                    "body": "We saved top-rated items for you. Priority support on every order.",
-                    "_eval": {"clarity": 5, "on_brand": 5, "persuasiveness": 4, "relevance": 4, "safety": 5, "overall": 4.6}
-                }
-            ]
-        },
-        "whatsapp": {
-            "variants": [
-                {
-                    "title": "Quick update",
-                    "body": "Your favorites are back in stock 📦",
-                    "_eval": {"clarity": 5, "on_brand": 4, "persuasiveness": 4, "relevance": 5, "safety": 5, "overall": 4.6}
-                }
-            ]
-        },
-        "push": {
-            "variants": [
-                {
-                    "title": "Ready for you",
-                    "body": "Quick tap to unlock your rewards",
-                    "_eval": {"clarity": 4, "on_brand": 4, "persuasiveness": 4, "relevance": 4, "safety": 5, "overall": 4.2}
-                }
-            ]
-        }
-    }
+        raise Exception(f"Failed to load messages for {group_name}: {e}. Ensure run_churn_radar.py has generated the exports.")
 
 def calculate_roi(group_name: str, params: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
     """

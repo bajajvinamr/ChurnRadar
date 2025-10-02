@@ -6,6 +6,16 @@ import streamlit as st
 import pandas as pd
 import sys
 import os
+from dotenv import load_dotenv
+import time
+
+# Load environment variables
+load_dotenv()
+
+# Check required environment variables
+if not os.getenv('OPENAI_API_KEY'):
+    st.error("Missing required environment variable OPENAI_API_KEY. Please set it in your .env file. See README section 'Environment Variables' for details.")
+    st.stop()
 
 # Add current directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -76,6 +86,13 @@ if 'selected_group' not in st.session_state:
 st.title("🧭 Churn Radar")
 st.markdown("**Actionable User Resurrection at Scale**")
 
+# Demo mode banner
+try:
+    last_export_time = time.ctime(os.path.getmtime(os.path.join(os.path.dirname(__file__), '..', 'exports', 'manifest.json')))
+    st.info(f"Demo Mode: On | Dataset: E Commerce Dataset.csv | Records: 5,630 | Last Export: {last_export_time}")
+except:
+    st.info("Demo Mode: On | Dataset: E Commerce Dataset.csv | Records: 5,630 | Last Export: Unknown")
+
 # Cache data loading
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_data():
@@ -84,21 +101,8 @@ def load_data():
         defaults = get_defaults()
         return groups, defaults
     except Exception as e:
-        st.error(f"Error loading data: {e}")
-        # Return demo data as fallback
-        return {
-            "Demo Group": {
-                "summary": {
-                    "size": 1000,
-                    "avg_score": 0.35,
-                    "avg_recency": 9.0,
-                    "avg_engagement": 5.0,
-                    "avg_value": 250.0,
-                    "avg_tenure": 12.0,
-                    "archetype": "Premium"
-                }
-            }
-        }, {"Demo Group": {"reactivation_rate": 0.1, "aov": 1500, "margin": 0.6}}
+        st.error(f"Error loading data: {e}. Ensure run_churn_radar.py has been executed successfully.")
+        st.stop()
 
 # Load data
 groups, defaults = load_data()
@@ -147,7 +151,7 @@ st.caption("Based on today's groups and baseline response rates.")
 
 # Cohort Ladder
 st.markdown("---")
-st.subheader("Where to start")
+st.subheader("Top 3 Groups")
 
 # Build ladder data
 ladder_rows = []
@@ -169,8 +173,8 @@ for name, card in groups.items():
         })
 
 if ladder_rows:
-    # Sort by net profit descending
-    ladder_df = pd.DataFrame(ladder_rows).sort_values("net_profit_numeric", ascending=False)
+    # Sort by net profit descending and take top 3
+    ladder_df = pd.DataFrame(ladder_rows).sort_values("net_profit_numeric", ascending=False).head(3)
     
     # Display table without the numeric sorting column
     display_df = ladder_df.drop(columns=["net_profit_numeric"])
@@ -258,7 +262,7 @@ if ladder_rows:
 
         # Messages Preview
         st.markdown("---")
-        st.subheader("What goes out")
+        st.subheader("Ready-to-Send Messages")
         
         msgs = kept_messages(top_group)
         msg_cols = st.columns(3)

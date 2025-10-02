@@ -72,23 +72,25 @@ def load_brand_documents():
     """Load brand documents for RAG-enhanced messaging"""
     brand_docs = {}
     
-    try:
-        brand_files = ['brand_overview.md', 'brand_voice.md', 'compliance.md', 'offer_policy.md']
-        
-        for filename in brand_files:
-            filepath = BRAND_DIR / filename
-            if filepath.exists():
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    brand_docs[filename] = content
-                    print(f"✅ Loaded brand document: {filename}")
-            else:
-                print(f"⚠️ Brand document not found: {filename}")
-        
-        return brand_docs
-    except Exception as e:
-        print(f"⚠️ Brand documents loading failed: {e}")
-        return {}
+    brand_files = ['brand_overview.md', 'brand_voice.md', 'compliance.md', 'offer_policy.md']
+    missing_files = []
+    
+    for filename in brand_files:
+        filepath = BRAND_DIR / filename
+        if filepath.exists():
+            with open(filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+                if not content.strip():
+                    raise RuntimeError(f"❌ Brand document is empty: {filename}. Please provide content for all brand documents.")
+                brand_docs[filename] = content
+                print(f"✅ Loaded brand document: {filename}")
+        else:
+            missing_files.append(filename)
+    
+    if missing_files:
+        raise RuntimeError(f"❌ Missing required brand documents: {', '.join(missing_files)}. Run 'python tools/validate_brandkit.py' to check. Ensure all four files exist in brand_kit/ directory.")
+    
+    return brand_docs
 
 def get_brand_context_for_archetype(archetype: str, brand_docs: dict) -> str:
     """Retrieve relevant brand context for archetype via simple RAG"""

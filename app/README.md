@@ -2,7 +2,7 @@
 
 ## 🎯 Product-Grade UI for Customer Resurrection Analytics
 
-Beautiful, demo-ready Streamlit application that transforms your churn analysis into actionable insights a marketer or CEO can understand at a glance.
+Beautiful, production-ready Streamlit application that transforms your churn analysis into actionable insights a marketer or CEO can understand at a glance.
 
 ## 🚀 Quick Start
 
@@ -98,7 +98,7 @@ Beautiful, demo-ready Streamlit application that transforms your churn analysis 
 1. **Backend Integration**: Imports `run_churn_radar.py` functions
 2. **Data Caching**: 5-minute cache for performance
 3. **Session State**: Maintains selected group across pages
-4. **Safe Fallbacks**: Demo data when backend unavailable
+4. **Error Handling**: Clear error messages with remediation steps
 
 ### Performance
 - **Caching Strategy**: Smart data caching with TTL

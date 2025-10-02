@@ -14,8 +14,8 @@ E-commerce companies lose 20-30% of customers annually while overspending on acq
 ### 1. Environment Setup
 ```bash
 # Clone and setup
-git clone https://github.com/bajajvinamr/Metuzi.git
-cd Metuzi
+git clone https://github.com/bajajvinamr/ChurnRadar.git
+cd ChurnRadar
 
 # Install dependencies (dev container ready)
 pip install -r requirements.txt
@@ -31,13 +31,18 @@ cp .env.example .env
 python run_churn_radar.py
 
 # Streamlit dashboard
-cd app && streamlit run app.py
+streamlit run app/app.py
 ```
 
 ### 3. Validate System
 ```bash
 # Comprehensive acceptance tests
 python acceptance_test.py
+```
+
+**Expected output if successful:**
+```
+🎉 ALL TESTS PASSED - SYSTEM READY FOR PRODUCTION
 ```
 
 ## 🏗️ System Architecture
@@ -107,7 +112,7 @@ python acceptance_test.py
 ## 🗂️ Project Structure
 
 ```
-Metuzi/
+ChurnRadar/
 ├── run_churn_radar.py          # Main analytics engine
 ├── acceptance_test.py          # Comprehensive test suite
 ├── dataset.csv                 # Sample customer data
@@ -126,6 +131,49 @@ Metuzi/
 │   └── *.csv                   # Cohort exports
 └── tests/                      # Unit test suite
 ```
+
+## 📊 Export Schema
+
+### Cohort CSV Files (`*_cohort.csv`)
+Generated for each customer segment with full feature data and scoring.
+
+| Column | Type | Description | Example |
+|--------|------|-------------|---------|
+| CustomerID | int | Unique customer identifier | 53344 |
+| Churn | int | Churn status (0=active, 1=churned) | 0 |
+| Tenure | float | Months with brand | 24.0 |
+| ResurrectionScore | float | AI-calculated comeback probability (0-1) | 0.712 |
+| MonetaryValue | float | Total spend (₹) | 333.0 |
+| Recency | int | Days since last order | 8 |
+| CohortID | int | Segment identifier | 24 |
+
+### Message Pack JSON (`copy_pack.json`)
+Brand-compliant message variants for each cohort and channel.
+
+```json
+{
+  "Payment-sensitive churners": {
+    "email": {
+      "variants": [
+        {
+          "title": "We Value Your Loyalty",
+          "body": "Exclusive ₹500 credit for your next order - use code LOYALTY2024",
+          "_eval": {
+            "overall": 4.6,
+            "clarity": 5,
+            "on_brand": 5,
+            "persuasiveness": 4,
+            "relevance": 4,
+            "safety": 5
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+**Currency Formatting**: All monetary values use Indian Rupee (₹) with comma grouping (e.g., ₹1,23,456.78).
 
 ## 🧪 Testing & Validation
 
